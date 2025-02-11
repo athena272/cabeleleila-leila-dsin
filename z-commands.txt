@@ -1,0 +1,6 @@
+pnpm dev
+
+pnpm start
+
+npx cypress open
+npx cypress run
