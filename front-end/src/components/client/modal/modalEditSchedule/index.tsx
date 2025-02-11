@@ -1,0 +1,132 @@
+import { useEffect, useState } from 'react';
+
+// Libs
+import Modal from 'styled-react-modal'
+import makeAnimated from "react-select/animated";
+import { IoMdClose } from "react-icons/io";
+import { toast } from 'react-toastify';
+
+//API Endpoints
+import { editSchedule, getAdminAccounts } from '../../../../pages/api/schedule-api';
+
+//Constants Values
+import { ModalProps, optionsType } from '../../../../constants/types';
+import { options } from '../../../../constants/objects';
+
+//Custom Styles
+import { Container, ContentContainer, HeaderContainer } from './styles';
+import { StyledSelect } from '../../../../styles/global';
+import { useSession } from 'next-auth/react';
+
+export function ModalEditSchedule(props: ModalProps) {
+    const { data: session } = useSession()
+
+    const isAdmin = getAdminAccounts(session?.user?.email)
+
+    const animatedComponents = makeAnimated();
+
+    const [name, setName] = useState<string>('');
+    const [date, setDate] = useState<string>('')
+    const [selectedOptions, setSelectedOptions] = useState<optionsType[]>([]);
+
+    useEffect(() => {
+        setName(props.data?.name ?? '')
+        setDate(props.data?.date ?? '')
+        setSelectedOptions(props.data?.selectedOptions ?? [])
+    },[props.isOpen])
+
+    function handleSubmit(event) {
+        event.preventDefault()
+
+        const data = {
+            id: props.data.id,
+            email: props.data.email,
+            name,
+            date,
+            selectedOptions,
+        }
+
+        editSchedule(data, isAdmin)
+            .then(() => {
+                toast.success('Alteração realizado com sucesso!', {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
+
+                props.toggleModal()
+
+                props.refetchSchedules()
+            })
+            .catch(() => {
+                toast.error('Ocorreu um erro ao realizar a atualização do agendamento, tente novamente!', {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true, 
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
+            })
+    }
+
+    return (
+        <Modal
+            isOpen={props.isOpen}
+            onBackgroundClick={props.toggleModal}
+            onEscapeKeydown={props.toggleModal}
+        >
+            <Container>
+                <HeaderContainer>
+                    <h4>Editar Agendamento</h4>
+                    <IoMdClose onClick={props.toggleModal} />
+                </HeaderContainer>
+
+                <ContentContainer>
+                    <form onSubmit={(event) => handleSubmit(event)}>
+                        <label>Nome</label>
+                        <input
+                            name="name"
+                            type="text"
+                            value={name}
+                            onChange={(event) => setName(event.target.value)}
+                        />
+                        <label>Data</label>
+                        <input
+                            name="date"
+                            type="date"
+                            value={date}
+                            onChange={(event) => setDate(event.target.value)}
+                        />
+                        <label>Serviços</label>
+                        <StyledSelect
+                            name="services"
+                            components={animatedComponents}
+                            placeholder="Selecione o serviço"
+                            isMulti
+                            value={selectedOptions}
+                            options={options}
+                            onChange={(item: any) => setSelectedOptions(item)}
+                            className="select"
+                            isClearable={true}
+                            isSearchable={true}
+                            isDisabled={false}
+                            isLoading={false}
+                            isRtl={false}
+                            closeMenuOnSelect={false}
+                        />
+
+                        <button type="submit">
+                            Atualizar Agendamento
+                        </button>
+                    </form>
+                </ContentContainer>
+            </Container>
+        </Modal>
+    )
+}
