@@ -19,6 +19,22 @@
         }
       ],
       "id": "6a99db53-dc91-4b79-8cbc-707987c0c14f"
+    },
+    {
+      "status": {
+        "value": "RECEIVED",
+        "label": "Recebido"
+      },
+      "name": "Guilherme Rosário",
+      "email": "guilhermerosariosalgado@gmail.com",
+      "date": "2025-02-13",
+      "selectedOptions": [
+        {
+          "value": "hairCut",
+          "label": "Corte de Cabelo"
+        }
+      ],
+      "id": "aac88a5c-6d82-40f4-afe4-2a384c05fa73"
     }
   ]
 }
